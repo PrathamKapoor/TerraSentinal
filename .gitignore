@@ -1,10 +1,23 @@
-# Python
+# ==============================================================================
+# TerraSentinel .gitignore
+# ==============================================================================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Environments & Virtual Environments
+.venv/
+venv/
 env/
+ENV/
+env.bak/
+venv.bak/
+
+# Packaging & Builds
 build/
 develop-eggs/
 dist/
@@ -20,17 +33,55 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.pytest_cache/
-*.db
-storage/
 
-# Node
-node_modules/
-dist/
-.vite/
+# Testing & Quality
+.pytest_cache/
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Local Runtime Data & Databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+storage/
+data/cache/
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-.env.local
-.env.*.local
+
+# Secrets & Environment Variables
+.env
+.env.*
+!.env.example
+
+# Node / Frontend Artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.vite/
+
+# IDE & Editor Specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini

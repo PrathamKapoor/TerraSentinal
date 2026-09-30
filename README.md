@@ -151,11 +151,18 @@ LEVEL 4: WHAT SHOULD A RESPONDER INVESTIGATE OR INTERVENE ON, WHY, AND WITH WHAT
 - Python 3.11+ (Tested on Python 3.13 on Windows 11 and Linux)
 - Node.js v18+ and npm
 
-### Backend Setup
-```powershell
-# Navigate to repository root
-cd C:\Projects\TerraSentinel
+### Environment Configuration
+```bash
+# Clone the repository
+git clone https://github.com/PrathamKapoor/TerraSentinal.git
+cd TerraSentinal
 
+# Copy example environment configuration
+cp .env.example .env
+```
+
+### Backend Setup
+```bash
 # Install Python requirements
 pip install -r backend/requirements.txt
 
@@ -167,9 +174,9 @@ python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Frontend Workbench Setup
-```powershell
-# In a separate terminal:
-cd C:\Projects\TerraSentinel\frontend
+```bash
+# In a separate terminal, navigate to frontend:
+cd frontend
 
 # Install dependencies
 npm install
