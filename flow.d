@@ -174,28 +174,33 @@ This document specifies the observable execution flow, algorithmic logic, data d
   - $\text{Pre} = 0 \land \text{Post} = 0 \implies \text{UNCHANGED\_LAND}$
 - Generates `ChangeRegion` objects representing the differential impact.
 
-### Step 16: Multimodal Fusion
-- `EvidenceFusionService.fuse(sar_evidence, optical_evidence, dem_evidence)`:
-  - Computes belief mass for each region:
-    $$m(\text{Flooded}) = 1 - (1 - w_{\text{sar}} \cdot c_{\text{sar}}) \cdot (1 - w_{\text{opt}} \cdot c_{\text{opt}})$$
-  - If SAR indicates flood ($c > 0.75$) but Optical indicates clear dry ground ($c > 0.75$) without cloud cover:
-    - Region is marked with `conflict_state = "CONFLICTING_EVIDENCE"`
-    - Generates a `VerificationFinding` for high-priority ground inspection.
+### Step 16: Multimodal Fusion & Graceful Missing-Modality Degradation
+- `EvidenceFusionEngine.fuse_observations(sar_vv, sar_vh, dem_slope, optical_mndwi, optical_cloud_pct)`:
+  - Base SAR evidence: $m_{\text{sar}}(\text{Flooded}) = \text{clip}((-16.0 - \text{VV}) / 6.0, 0, 1)$
+  - Optical verification: $m_{\text{opt}}(\text{Flooded}) = \text{clip}((\text{MNDWI} + 0.15) / 0.55, 0, 1)$
+  - DEM terrain constraint: Slope penalty $\text{clip}((\text{slope} - 8^\circ) / 4^\circ, 0, 1)$
+  - Graceful Degradation:
+    - If Optical is missing/clouded ($> 80\%$ clouds): Fallback to `DEGRADED_SAR_ONLY` with $-0.18$ confidence penalty.
+    - If SAR is missing (orbital gap): Fallback to `DEGRADED_OPTICAL_ONLY` with $-0.10$ confidence penalty.
+    - If DEM is missing: Fallback to `UNCONSTRAINED_TERRAIN` with $-0.15$ confidence penalty.
+    - If all modalities are missing: Reject execution with `ValueError` rather than fabricating synthetic data.
+  - Sensor Discordance / Conflict Detection:
+    - If SAR indicates flood ($\text{VV} < -16\text{ dB}$) but Optical indicates clear dry ground ($\text{MNDWI} \le 0.0$ under $< 15\%$ clouds):
+      - Region marked with `conflict_state = "CONFLICTING"` and explicit `conflict_mask`.
+      - Suppresses downstream automated priority score by 30% and enforces `PriorityLevel.VERIFY` for human ground review.
 
 ### Step 17: Infrastructure Ingestion
-- `InfrastructureService.load_infrastructure(aoi)`:
-  - Queries Overpass API or loads local cached OpenStreetMap extract within AOI bounding box.
-  - Ingests:
-    - Highway network lines (motorways, primaries, secondaries, bridges).
-    - Building footprints (polygons).
-    - Critical facilities (points/polygons with tags `amenity=hospital`, `amenity=clinic`, `amenity=fire_station`, `amenity=police`, `amenity=shelter`, `amenity=school`).
+- `InfrastructureService.generate_synthetic_osm_network(bounds)` or live Overpass API:
+  - Ingests highway network lines (motorways, primaries, secondaries, bridges), building footprints, and critical facilities.
 
-### Step 18: Spatial Joins
-- System builds a Spatial Index (R-Tree / Shapely `STRtree`) of flood polygons.
-- Performs spatial intersection:
-  - `road_geom.intersection(flood_geom)`: returns overlapping segment lengths.
-  - `building_geom.intersection(flood_geom)`: returns flooded area ratio.
-  - `facility_geom.distance(flood_geom)`: returns proximity or direct inundation.
+### Step 18: Spatial Joins & Deduplication Invariants
+- All extracted flood vector contours are sanitized via `shapely.validation.make_valid` to resolve self-intersecting bowtie geometries.
+- Intersecting candidate flood polygons are dissolved via `shapely.ops.unary_union` before computing line overlap.
+- Guarantees zero double-counting of road lengths across contiguous flood zones.
+- Spatial queries:
+  - `road_geom.intersection(merged_flood)`: returns true overlapping segment lengths.
+  - `facility_geom.intersects(merged_flood)`: flags direct facility inundation.
+  - `building_geom.intersection(merged_flood)`: returns flooded area ratio.
 
 ### Step 19: Road Passability Derivation
 - Passability heuristic and rule:
@@ -247,15 +252,18 @@ This document specifies the observable execution flow, algorithmic logic, data d
   - Disagreement between satellite inundation mask and human ground reports.
 - If conflict detected, item flagged with `CONFLICTING_EVIDENCE`, lowering recommendation automation and raising human verification requirement.
 
-### Step 26: Priority Generation
-- Multi-Criteria Decision Criticality Index:
-  $$\text{Score} = w_1 \cdot \text{PopAffected} + w_2 \cdot \text{HospitalCutOff} + w_3 \cdot \text{BridgeSevered} + w_4 \cdot \text{IsolationFactor} + w_5 \cdot \text{Confidence}$$
-- Findings categorized:
-  - Score $\ge 80 \implies$ `CRITICAL`
-  - $60 \le \text{Score} < 80 \implies$ `HIGH`
-  - $35 \le \text{Score} < 60 \implies$ `MEDIUM`
-  - $\text{Score} < 35 \implies$ `LOW`
-  - Low confidence with high potential impact $\implies$ `VERIFICATION_REQUIRED`
+### Step 26: Priority Generation & Uncertainty Suppression
+- Multi-Criteria Decision Criticality Index with logarithmic population scaling and facility weighting:
+  $$\text{Score} = \min(40.0, 8.0 \cdot \log_{10}(\text{Pop} + 1)) + 15.0 \cdot N_{\text{hospitals}} + 8.0 \cdot N_{\text{shelters}} + \min(25.0, 0.25 \cdot \Delta T) + 15.0 \cdot \mathbb{I}_{\text{isolated}}$$
+- Under sensor discordance / conflict, uncertainty suppression applies:
+  $$\text{Score}_{\text{final}} = \text{Score} \times (1.0 - 0.30 \cdot \mathbb{I}_{\text{conflict}})$$
+- Priority levels:
+  - $\text{Score}_{\text{final}} \ge 80 \implies$ `CRITICAL`
+  - $60 \le \text{Score}_{\text{final}} < 80 \implies$ `HIGH`
+  - $35 \le \text{Score}_{\text{final}} < 60 \implies$ `MEDIUM`
+  - $\text{Score}_{\text{final}} < 35 \implies$ `LOW`
+  - Sensor conflict detected $\implies$ Overrides to `VERIFY` for human inspection
+- Deterministic multi-key tie breaking: $(-\text{Score}_{\text{final}}, -\text{Pop}, -\text{Confidence}, \text{ID}_{\text{lexicographical}})$.
 
 ### Step 27: Verification Findings Creation
 - Any finding with `conflict_state != NONE` or `confidence < 0.60` in a high-consequence zone is placed in the **Verification Queue**.
@@ -265,23 +273,26 @@ This document specifies the observable execution flow, algorithmic logic, data d
 ### Step 28: Counterfactual Simulation Execution
 - Invoked via `POST /api/v1/simulations`.
 - Operator selects candidate action:
-  - Action: `RESTORE_EDGE` (e.g. clear debris on Road R-104) or `DEPLOY_PONTOON` (bridge bypass).
-- Simulation Engine clones active graph, restores edge impedance to `OPEN`, and re-runs:
-  - Dijkstra shortest paths to facilities.
-  - Connected component decomposition.
-- Computes delta metrics:
-  - $\Delta \text{Reconnected Population} = +14,250$
-  - $\Delta \text{Hospital Access Restored} = +2\text{ hospitals}$
-  - $\Delta \text{Average Travel Time} = -42\text{ minutes}$.
+  - Action: `RESTORE_ROAD` (clear debris or install modular bridge) or `BREACH_LEVEE`.
+- **Immutability Guarantee:** Simulation Engine performs `copy.deepcopy` of road features and critical facilities. The observed baseline is never modified in-place.
+- Re-runs Dijkstra shortest paths and connected component decomposition on the modified graph topology.
+- Dynamically computes differential deltas:
+  - $\Delta \text{Reconnected Population} = \sum \text{Pop}(\text{formerly isolated settlements connected})$
+  - $\Delta \text{Hospital Access Restored} = N_{\text{hospitals}}(\text{restored})$
+  - $\Delta \text{Average Travel Time Saved} = \frac{1}{|C|} \sum \max(0.0, T_{\text{baseline}}(c) - T_{\text{sim}}(c))\text{ minutes}$.
 - Returns result clearly marked: `status: "SIMULATED / COUNTERFACTUAL"`.
 
-### Step 29: Results Persistence
+### Step 29: Results Persistence & Decision Receipts
 - Database transactions store:
   - `FloodRegion` rows with GeoJSON geometry and confidence.
   - `RoadSegment` passability updates.
   - `ImpactFinding` rows with causal chains.
   - `Evidence` records and `EvidenceRelation` edges.
-  - `DecisionReceipt` with cryptographic SHA-256 integrity hash.
+- Decision Receipt generated with tripartite categorized evidence blocks:
+  - `observed_evidence`: Satellite sensor metadata, acquisition time, radar polarizations, optical cloud cover, and conflict states.
+  - `inferred_impacts`: Severed road segments, flooded critical facilities, isolated communities, and travel time deltas.
+  - `simulated_counterfactuals`: Candidate actions, restored access, reconnected population, and travel time saved.
+- Cryptographic SHA-256 seal generated over canonical JSON serialization. Any post-hoc mutation triggers seal mismatch.
 - Analysis run status updated to `COMPLETED`.
 
 ### Step 30: Frontend Requests Results

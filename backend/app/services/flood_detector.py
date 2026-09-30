@@ -64,7 +64,7 @@ class DualPolSARTerrainAdapter(BaseModelAdapter):
         self,
         sar_vv: np.ndarray,
         sar_vh: np.ndarray,
-        dem_slope: np.ndarray,
+        dem_slope: Optional[np.ndarray],
         optical_mndwi: Optional[np.ndarray],
         bounds: Tuple[float, float, float, float]
     ) -> FloodDetectionResult:
@@ -76,7 +76,12 @@ class DualPolSARTerrainAdapter(BaseModelAdapter):
         sar_water = (vv_clean < self.vv_threshold) & (vh_clean < self.vh_threshold)
         
         # 3. Topographic constraint: standing floodwaters cannot remain on steep slopes
-        terrain_valid = (dem_slope <= self.max_slope)
+        if dem_slope is not None:
+            terrain_valid = (dem_slope <= self.max_slope)
+            slope_penalty = np.clip((dem_slope - self.max_slope) / 4.0, 0.0, 1.0)
+        else:
+            terrain_valid = np.ones_like(sar_water, dtype=bool)
+            slope_penalty = np.zeros_like(sar_vv, dtype=np.float32)
         
         # Reject radar shadows on mountain ridges
         filtered_water = sar_water & terrain_valid
@@ -87,13 +92,13 @@ class DualPolSARTerrainAdapter(BaseModelAdapter):
         vh_dist = (self.vh_threshold - vh_clean) / 4.0
         sar_prob = 1.0 / (1.0 + np.exp(-(vv_dist + vh_dist)))
         
-        # Suppress probability on steep slopes
-        slope_penalty = np.clip((dem_slope - self.max_slope) / 4.0, 0.0, 1.0)
         probability_map = sar_prob * (1.0 - slope_penalty)
         
         # 5. Multimodal confidence calculation
         # Baseline confidence from distance to threshold
         base_confidence = np.clip(np.abs(vv_clean - self.vv_threshold) / 8.0, 0.45, 0.95)
+        if dem_slope is None:
+            base_confidence -= 0.15  # Penalty for unconstrained terrain
         
         # If optical is available and unclouded, modulate confidence
         if optical_mndwi is not None:

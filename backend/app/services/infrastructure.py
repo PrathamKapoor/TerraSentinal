@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Tuple, Optional
 import numpy as np
 from shapely.geometry import shape, Point, LineString, Polygon, MultiPolygon, mapping
+from shapely.ops import unary_union
 from shapely.strtree import STRtree
 from backend.app.config import settings
 from backend.app.models.schemas import (
@@ -268,11 +269,11 @@ class InfrastructureService:
             flooded_len = 0.0
             if tree and total_len > 0:
                 candidate_indices = tree.query(road_line)
-                for idx in candidate_indices:
-                    fg = flood_geoms[idx]
-                    if road_line.intersects(fg):
-                        inter = road_line.intersection(fg)
-                        flooded_len += inter.length
+                candidate_geoms = [flood_geoms[idx] for idx in candidate_indices if road_line.intersects(flood_geoms[idx])]
+                if candidate_geoms:
+                    merged_flood = unary_union(candidate_geoms)
+                    inter = road_line.intersection(merged_flood)
+                    flooded_len = inter.length
                         
             overlap_ratio = min(1.0, flooded_len / max(1e-7, total_len))
             props["flood_overlap_ratio"] = round(overlap_ratio, 3)

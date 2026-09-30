@@ -382,6 +382,11 @@ class DecisionReceipt(BaseModel):
     verification_timestamp: Optional[datetime] = None
     verification_notes: Optional[str] = None
 
+    # Explicit Information Categorization (OBSERVED / INFERRED / SIMULATED)
+    observed_evidence: Dict[str, Any] = Field(default_factory=dict)
+    inferred_impacts: Dict[str, Any] = Field(default_factory=dict)
+    simulated_counterfactuals: Optional[Dict[str, Any]] = None
+
 # -------------------------------------------------------------------------
 # Mission Control Dashboard Summary
 # -------------------------------------------------------------------------

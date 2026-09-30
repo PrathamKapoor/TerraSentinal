@@ -2,6 +2,7 @@ import numpy as np
 from scipy import ndimage
 from shapely.geometry import Polygon, MultiPolygon, shape, mapping, box, Point
 from shapely.ops import unary_union
+from shapely.validation import make_valid
 from typing import Tuple, List, Dict, Any, Optional
 
 def amplitude_to_db(amplitude: np.ndarray) -> np.ndarray:
@@ -21,18 +22,19 @@ def lee_speckle_filter(raster: np.ndarray, window_size: int = 5) -> np.ndarray:
     if window_size % 2 == 0:
         window_size += 1
         
-    mean = ndimage.uniform_filter(raster.astype(np.float32), size=window_size)
-    mean_sq = ndimage.uniform_filter(np.square(raster.astype(np.float32)), size=window_size)
+    clean_raster = np.nan_to_num(raster.astype(np.float32), nan=-30.0)
+    mean = ndimage.uniform_filter(clean_raster, size=window_size)
+    mean_sq = ndimage.uniform_filter(np.square(clean_raster), size=window_size)
     variance = np.maximum(mean_sq - np.square(mean), 0.0)
     
-    overall_variance = np.var(raster)
+    overall_variance = np.var(clean_raster)
     if overall_variance < 1e-6:
-        return raster
+        return clean_raster
         
     weights = variance / (variance + overall_variance + 1e-7)
     weights = np.clip(weights, 0.0, 1.0)
     
-    filtered = mean + weights * (raster - mean)
+    filtered = mean + weights * (clean_raster - mean)
     return filtered.astype(np.float32)
 
 def calculate_mndwi(green: np.ndarray, swir: np.ndarray) -> np.ndarray:
@@ -127,6 +129,9 @@ def raster_to_geojson_polygons(
         geom = unary_union(boxes)
         if simplify_tolerance > 0:
             geom = geom.simplify(simplify_tolerance, preserve_topology=True)
+            
+        if not geom.is_valid:
+            geom = make_valid(geom)
             
         if geom.is_empty:
             continue

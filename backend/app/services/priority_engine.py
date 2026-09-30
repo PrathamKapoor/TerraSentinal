@@ -13,7 +13,51 @@ class PriorityEngine:
     """
     
     @staticmethod
+    def compute_criticality_score(
+        population: int,
+        facilities_impacted: int,
+        is_isolation: bool,
+        is_bridge: bool,
+        confidence: float,
+        has_conflict: bool,
+        w_pop: float = 0.35,
+        w_fac: float = 0.25,
+        w_sev: float = 0.25,
+        w_conf: float = 0.15
+    ) -> Tuple[float, PriorityLevel]:
+        import numpy as np
+        # 1. Population normalization (logarithmic)
+        norm_pop = min(1.0, float(np.log10(max(1, population)) / np.log10(50000)))
+        # 2. Facility normalization (linear up to 5 critical facilities)
+        norm_fac = min(1.0, facilities_impacted / 5.0)
+        # 3. Network Severance normalization
+        if is_isolation:
+            norm_sev = 1.0
+        elif is_bridge:
+            norm_sev = 0.80
+        else:
+            norm_sev = 0.50
+        # 4. Confidence normalization
+        norm_conf = max(0.0, min(1.0, confidence))
+        
+        raw = 100.0 * (w_pop * norm_pop + w_fac * norm_fac + w_sev * norm_sev + w_conf * norm_conf)
+        if has_conflict:
+            raw *= 0.70  # Uncertainty suppression
+            priority = PriorityLevel.VERIFY
+        elif raw >= 80.0:
+            priority = PriorityLevel.CRITICAL
+        elif raw >= 60.0:
+            priority = PriorityLevel.HIGH
+        elif raw >= 40.0:
+            priority = PriorityLevel.MEDIUM
+        else:
+            priority = PriorityLevel.LOW
+            
+        return round(raw, 1), priority
+
+    @classmethod
     def generate_findings(
+        cls,
         event_id: str,
         road_features: List[Dict[str, Any]],
         bridge_features: List[Dict[str, Any]],
@@ -72,14 +116,24 @@ class PriorityEngine:
                 )
             ]
             
+            comm_conf = round(mean_flood_confidence * 0.94, 2)
+            comm_score, comm_prio = cls.compute_criticality_score(
+                population=comm.estimated_population,
+                facilities_impacted=2,
+                is_isolation=True,
+                is_bridge=False,
+                confidence=comm_conf,
+                has_conflict=False
+            )
+            
             findings.append(ImpactFinding(
                 id=f"finding_iso_{comm.component_id}",
                 event_id=event_id,
                 title=f"Catastrophic Isolation of {comm.community_name}",
                 finding_type="ISOLATED_COMMUNITY",
-                priority=PriorityLevel.CRITICAL,
-                criticality_score=94.5,
-                confidence=round(mean_flood_confidence * 0.94, 2),
+                priority=comm_prio,
+                criticality_score=comm_score,
+                confidence=comm_conf,
                 conflict_state=ConflictState.NONE,
                 affected_population=comm.estimated_population,
                 affected_infrastructure_ids=comm.severed_access_roads,
@@ -97,6 +151,15 @@ class PriorityEngine:
             props = b["properties"]
             coords = b["geometry"]["coordinates"]
             mid_pt = coords[len(coords)//2]
+            
+            bridge_score, bridge_prio = cls.compute_criticality_score(
+                population=18500,
+                facilities_impacted=1,
+                is_isolation=False,
+                is_bridge=True,
+                confidence=0.89,
+                has_conflict=False
+            )
             
             ev_chain_bridge = [
                 EvidenceChainItem(
@@ -131,8 +194,8 @@ class PriorityEngine:
                 event_id=event_id,
                 title=f"Arterial Severance: {props.get('name', 'Bridge B-14')}",
                 finding_type="SUBMERGED_BRIDGE",
-                priority=PriorityLevel.CRITICAL,
-                criticality_score=89.0,
+                priority=bridge_prio,
+                criticality_score=bridge_score,
                 confidence=0.89,
                 conflict_state=ConflictState.NONE,
                 affected_population=18500,
@@ -147,13 +210,22 @@ class PriorityEngine:
             
         # 3. Verification Finding: If Sensor Conflict Exists
         if evidence_conflict_detected:
+            conflict_score, conflict_prio = cls.compute_criticality_score(
+                population=6200,
+                facilities_impacted=1,
+                is_isolation=False,
+                is_bridge=False,
+                confidence=0.48,
+                has_conflict=True
+            )
+            
             findings.append(ImpactFinding(
                 id=f"finding_verify_conflict_{event_id}",
                 event_id=event_id,
                 title="Multi-Sensor Conflict: Highway N2 Causeway Sector",
                 finding_type="VERIFICATION_REQUIRED",
-                priority=PriorityLevel.VERIFY,
-                criticality_score=72.0,
+                priority=conflict_prio,
+                criticality_score=conflict_score,
                 confidence=0.48,
                 conflict_state=ConflictState.SAR_OPTICAL_DISAGREEMENT,
                 affected_population=6200,
@@ -175,6 +247,8 @@ class PriorityEngine:
                 created_at=now
             ))
             
+        # Sort findings by criticality score with deterministic tie breaking
+        findings.sort(key=lambda f: (-f.criticality_score, -f.affected_population, -f.confidence, f.id))
         return findings
 
     @staticmethod
