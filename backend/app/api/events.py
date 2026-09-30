@@ -13,7 +13,7 @@ from backend.app.models.schemas import (
     EventCreateRequest, EventResponse, MissionControlSummary,
     EventObservationsSummary, FloodRegionSummary, InfrastructureImpactSummary,
     PopulationImpactSummary, IsolationAssessmentSummary, ImpactFinding,
-    ObservationQuality, IsolatedCommunity, GeoJSONGeometry
+    ObservationQuality, IsolatedCommunity, GeoJSONGeometry, AnalysisRunResponse
 )
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -234,10 +234,27 @@ def get_event_summary(event_id: str, db: Session = Depends(get_db)):
         is_fixture_mode=e.is_fixture_mode,
         fixture_id=e.fixture_id
     )
-    
+
+    run_resp = None
+    if latest_run:
+        run_resp = AnalysisRunResponse(
+            id=latest_run.id,
+            event_id=latest_run.event_id,
+            status=latest_run.status,
+            stage=latest_run.stage,
+            progress=latest_run.progress,
+            stage_message=latest_run.stage_message,
+            error_message=latest_run.error_message,
+            started_at=latest_run.started_at,
+            completed_at=latest_run.completed_at,
+            execution_time_seconds=latest_run.execution_time_seconds,
+            model_name=latest_run.model_name,
+            model_version=latest_run.model_version
+        )
+
     return MissionControlSummary(
         event=event_resp,
-        latest_run=latest_run,
+        latest_run=run_resp,
         observations_summary=obs_summary,
         flood_summary=flood_summary,
         infrastructure_summary=infra_summary,

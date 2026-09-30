@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from backend.app.db.session import Base
@@ -16,8 +16,8 @@ class DBEvent(Base):
     post_event_date = Column(String, nullable=False)
     is_fixture_mode = Column(Boolean, default=False)
     fixture_id = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     runs = relationship("DBAnalysisRun", back_populates="event", cascade="all, delete-orphan")
     findings = relationship("DBImpactFinding", back_populates="event", cascade="all, delete-orphan")
@@ -55,7 +55,7 @@ class DBObservation(Base):
     source_catalog = Column(String, default="STAC")
     age_hours = Column(Float, default=0.0)
     metadata_json = Column(JSON, default=dict)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class DBFloodResult(Base):
     __tablename__ = "flood_results"
@@ -66,7 +66,7 @@ class DBFloodResult(Base):
     flood_geojson = Column(JSON, nullable=False)
     change_geojson = Column(JSON, nullable=False)
     summary_json = Column(JSON, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class DBInfrastructureResult(Base):
     __tablename__ = "infrastructure_results"
@@ -80,7 +80,7 @@ class DBInfrastructureResult(Base):
     buildings_geojson = Column(JSON, nullable=False)
     isolated_communities_json = Column(JSON, nullable=False)
     summary_json = Column(JSON, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class DBImpactFinding(Base):
     __tablename__ = "impact_findings"
@@ -105,7 +105,7 @@ class DBImpactFinding(Base):
     verification_notes = Column(Text, nullable=True)
     verified_by = Column(String, nullable=True)
     verification_timestamp = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     event = relationship("DBEvent", back_populates="findings")
 
@@ -120,7 +120,7 @@ class DBSimulation(Base):
     simulated_isolated_pop = Column(Integer, default=0)
     delta_json = Column(JSON, nullable=False)
     explanation = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class DBDecisionReceipt(Base):
     __tablename__ = "decision_receipts"
@@ -130,4 +130,4 @@ class DBDecisionReceipt(Base):
     event_id = Column(String, ForeignKey("events.id"), nullable=False, index=True)
     receipt_json = Column(JSON, nullable=False)
     integrity_sha256 = Column(String, nullable=False, unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

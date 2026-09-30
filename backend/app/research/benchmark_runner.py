@@ -167,3 +167,15 @@ class BenchmarkRunner:
         })
         
         return results
+
+if __name__ == "__main__":
+    import json
+    print("Running TerraSentinel Empirical Benchmarks (EXP-01 to EXP-06)...")
+    res = BenchmarkRunner.run_all_experiments()
+    print(f"\nCompleted {len(res)} experiments successfully.\n")
+    print(f"{'Exp ID':<8} | {'Name':<35} | {'IoU':<7} | {'F1':<7} | {'Precision':<10} | {'Recall':<8} | {'Runtime'}")
+    print("-" * 90)
+    for r in res:
+        m = r["metrics"]
+        print(f"{r['experiment_id']:<8} | {r['name']:<35} | {m['iou']:<7.4f} | {m['f1']:<7.4f} | {m['precision']:<10.4f} | {m['recall']:<8.4f} | {r['runtime_ms']} ms")
+    print("-" * 90)

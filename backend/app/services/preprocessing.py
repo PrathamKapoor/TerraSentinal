@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from shapely.geometry import Polygon, MultiPolygon, shape, mapping
+from shapely.geometry import Polygon, MultiPolygon, shape, mapping, box, Point
 from shapely.ops import unary_union
 from typing import Tuple, List, Dict, Any, Optional
 
@@ -39,7 +39,6 @@ def calculate_mndwi(green: np.ndarray, swir: np.ndarray) -> np.ndarray:
     """
     Calculates Modified Normalized Difference Water Index (MNDWI):
     MNDWI = (Green - SWIR) / (Green + SWIR + 1e-7)
-    Values > 0.0 indicate water; SWIR heavily absorbs water radiation.
     """
     denom = green.astype(np.float32) + swir.astype(np.float32) + 1e-7
     mndwi = (green.astype(np.float32) - swir.astype(np.float32)) / denom
@@ -56,7 +55,7 @@ def calculate_ndvi(nir: np.ndarray, red: np.ndarray) -> np.ndarray:
 
 def calculate_dem_slope(elevation: np.ndarray, cell_size_meters: float = 30.0) -> np.ndarray:
     """
-    Computes terrain slope in degrees using Sobel spatial gradients on DEM.
+    Computes terrain slope in degrees using Sobel spatial gradients on DEM with physical cell size.
     """
     gy, gx = np.gradient(elevation.astype(np.float32), cell_size_meters, cell_size_meters)
     slope_rad = np.arctan(np.sqrt(gx**2 + gy**2))
@@ -65,12 +64,12 @@ def calculate_dem_slope(elevation: np.ndarray, cell_size_meters: float = 30.0) -
 def raster_to_geojson_polygons(
     mask: np.ndarray,
     bounds: Tuple[float, float, float, float], # min_lon, min_lat, max_lon, max_lat
-    min_area_pixels: int = 12,
-    simplify_tolerance: float = 0.0001
+    min_area_pixels: int = 8,
+    simplify_tolerance: float = 0.0004
 ) -> List[Dict[str, Any]]:
     """
     Converts a binary raster mask into clean GeoJSON Polygons/MultiPolygons
-    using connected-component labeling and contour simplification.
+    using horizontal pixel run aggregation and unary union for exact spatial contours.
     """
     min_lon, min_lat, max_lon, max_lat = bounds
     height, width = mask.shape
@@ -93,48 +92,57 @@ def raster_to_geojson_polygons(
     
     # Process each connected component
     for feature_id in range(1, num_features + 1):
-        pixel_count = np.sum(labeled == feature_id)
+        pixel_count = int(np.sum(labeled == feature_id))
         if pixel_count < min_area_pixels:
             continue
             
         rows, cols = np.where(labeled == feature_id)
-        r_min, r_max = rows.min(), rows.max()
-        c_min, c_max = cols.min(), cols.max()
+        r_min, r_max = int(rows.min()), int(rows.max())
+        c_min, c_max = int(cols.min()), int(cols.max())
         
-        # Bounding box coordinates for the component
-        p_min_lon = min_lon + c_min * lon_scale
-        p_max_lon = min_lon + (c_max + 1) * lon_scale
-        p_max_lat = max_lat - r_min * lat_scale
-        p_min_lat = max_lat - (r_max + 1) * lat_scale
-        
-        # If component is rectangular or convex, build polygon boundary
-        sub_mask = (labeled[r_min:r_max+1, c_min:c_max+1] == feature_id)
-        
-        # Create box/polygon geometry
-        poly_coords = [
-            [p_min_lon, p_min_lat],
-            [p_max_lon, p_min_lat],
-            [p_max_lon, p_max_lat],
-            [p_min_lon, p_max_lat],
-            [p_min_lon, p_min_lat]
-        ]
-        poly = Polygon(poly_coords)
-        if simplify_tolerance > 0:
-            poly = poly.simplify(simplify_tolerance, preserve_topology=True)
+        # Aggregate horizontal runs of pixels to form exact polygonal boxes
+        boxes = []
+        for r in range(r_min, r_max + 1):
+            row_mask = (labeled[r, c_min:c_max + 1] == feature_id)
+            if not np.any(row_mask):
+                continue
             
-        # Calculate approximate area in square kilometers
-        # 1 deg lat ~ 111 km, 1 deg lon ~ 111 * cos(mean_lat) km
-        mean_lat = (p_min_lat + p_max_lat) / 2.0
-        lat_km = (p_max_lat - p_min_lat) * 111.32
-        lon_km = (p_max_lon - p_min_lon) * 111.32 * np.cos(np.radians(mean_lat))
-        area_sqkm = round(float(abs(lat_km * lon_km) * (pixel_count / max(1, (r_max - r_min + 1) * (c_max - c_min + 1)))), 4)
+            # Find contiguous runs
+            diff = np.diff(np.pad(row_mask.astype(np.int8), (1, 1), 'constant'))
+            starts = np.where(diff == 1)[0]
+            ends = np.where(diff == -1)[0]
+            
+            y_top = max_lat - r * lat_scale
+            y_bot = max_lat - (r + 1) * lat_scale
+            
+            for s, e in zip(starts, ends):
+                x_left = min_lon + (c_min + s) * lon_scale
+                x_right = min_lon + (c_min + e) * lon_scale
+                boxes.append(box(x_left, y_bot, x_right, y_top))
+                
+        if not boxes:
+            continue
+            
+        # Merge runs into unified exact contour
+        geom = unary_union(boxes)
+        if simplify_tolerance > 0:
+            geom = geom.simplify(simplify_tolerance, preserve_topology=True)
+            
+        if geom.is_empty:
+            continue
+            
+        # Calculate real geographic area in square kilometers
+        mean_lat = (min_lat + max_lat) / 2.0
+        deg_lat_km = 111.32
+        deg_lon_km = 111.32 * np.cos(np.radians(mean_lat))
+        area_sqkm = round(float(geom.area * deg_lat_km * deg_lon_km), 3)
         
         polygons.append({
             "type": "Feature",
-            "geometry": mapping(poly),
+            "geometry": mapping(geom),
             "properties": {
                 "feature_id": feature_id,
-                "pixel_count": int(pixel_count),
+                "pixel_count": pixel_count,
                 "area_sqkm": area_sqkm
             }
         })
