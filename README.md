@@ -205,28 +205,52 @@ Open your browser at `http://localhost:3000` to interact with the operational wo
 
 ---
 
-## 7. Research Benchmarking & Empirical Multi-Event Evaluation
+## 7. Dual-Track Research Benchmarking Suite
 
-Run the multi-event holdout benchmark suite via CLI:
+TerraSentinel maintains two strictly separated, independent evaluation tracks:
+1. **REAL-DATA EMPIRICAL VALIDATION:** Authentic Earth-observation satellite data and independent hand labels.
+2. **CONTROLLED SYNTHETIC SENSOR-STRESS BENCHMARK:** Parametric stress scenarios isolating edge-case physical failure modes.
+
+Run both benchmarks via CLI:
 ```powershell
 python -m backend.app.research.benchmark_runner
 ```
 
-To eliminate single-chip spatial autocorrelation leakage, TerraSentinel evaluates across a **5-event cross-geographic split** across distinct biomes:
-- **Train Events:** `sylhet_bangladesh_2026` (Monsoon Riverine Floodplain), `red_river_usa_2026` (Spring Thaw Lowlands), `ebro_valley_spain_2026` (Mountain Flash Flood)
-- **Validation Event:** `mekong_cambodia_2026` (Tropical Wetland Canopy)
-- **Unseen Holdout Test:** `beira_mozambique_2026` (Coastal Cyclone Storm Surge with Gale-Force Wind-Roughened Water)
+---
 
-### Multimodal Ablation Matrix (EXP-A through EXP-E)
-| Experiment ID | Configuration | Modalities Active | Val IoU (Mekong) | Holdout Test IoU (Beira Surge) | Overall Macro IoU | Overall F1 / Dice | Primary Physical Finding |
+### Track 1: Real-Data Empirical Validation (Sen1Floods11 v1.1)
+*Authority: Primary Earth Observation Scientific Standard* — Detailed report: **[real-data-validation.md](research/benchmarks/real-data-validation.md)**
+
+Evaluates authentic Copernicus Sentinel-1 C-band SAR (VV/VH float32) and Sentinel-2 optical imagery across **11 global chips (2,883,584 pixels)** from the peer-reviewed **Sen1Floods11 (v1.1)** benchmark (Bonafilia et al., 2020), evaluated against independent consensus hand-annotated labels. Strictly enforces out-of-domain event holdout:
+- **Unseen Holdout Event (TEST):** Bolivia Mamoré River Surge (`Bolivia_103757`, `Bolivia_129334`, `Bolivia_195474`)
+- **Validation Event (VAL):** Cambodia Mekong Delta Basin (`Mekong_1149855`, `Mekong_977338`)
+- **Regional Training Events (TRAIN):** USA Arkansas River, Spain Vega Baja, India Brahmaputra River
+
+#### Empirical Real-Data Results (All 11 Real Satellite Chips)
+| Baseline ID | Model Classification | Modality / Architecture | Macro IoU | Micro IoU | Val IoU (Mekong) | Unseen Test IoU (Bolivia) | Primary Empirical Finding |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **EXP-A** | SAR Single-Pol | SAR VV only | 0.6842 | 0.2215 | **0.6352** | 0.7769 | Collapses on wind-roughened open water in Beira |
-| **EXP-B** | Optical Only | Sentinel-2 MNDWI | 0.7610 | 0.8240 | **0.7866** | 0.8805 | Completely blinded by cloud cover during active storms |
-| **EXP-C** | SAR Dual-Pol | SAR VV + VH | 0.7125 | 0.2450 | **0.6512** | 0.7888 | Suppresses volume noise but fails on gale wind roughening |
-| **EXP-D** | SAR Dual + DEM | SAR VV + VH + SRTM DEM | 0.7240 | 0.2450 | **0.6550** | 0.7915 | Eliminates 100% of mountain ridge radar shadows in Ebro Valley |
-| **EXP-E** | Full Evidential Fusion | SAR Dual + Optical + DEM | 0.8120 | **0.8515** | **0.8109** | **0.8956** | Optical consensus recovers wind-roughened radar ambiguity |
+| **BASE-A** | `HEURISTIC` | SAR-Only Dual-Pol ($\sigma^0_{VV} < -16, \sigma^0_{VH} < -23$) | 0.3729 | 0.6651 | 0.6226 | 0.3607 | High precision ($>97\%$), misses shallow vegetated water |
+| **BASE-B** | `HEURISTIC` | Optical-Only ($\text{MNDWI} > 0.0$ on valid pixels) | **0.5497** | **0.7171** | 0.6391 | 0.5662 | Captures shallow water boundaries; vulnerable to clouds |
+| **BASE-C** | `HEURISTIC` | Multimodal SAR + Optical Consensus | 0.4502 | 0.6797 | 0.6328 | 0.5641 | High recall; inherits optical false alarms on wet soil |
+| **BASE-D** | `HEURISTIC` | **TerraSentinel Dempster-Shafer Evidential Fusion** | 0.4481 | 0.7006 | **0.6626** | 0.3710 | Calibrated balance ($82\%$ test precision); flags conflicts |
+| **BASE-E** | `UNTRAINED / ADAPTER` | Convolutional U-Net Spatial Adapter | 0.4626 | 0.7073 | 0.6734 | **0.5876** | Heuristic 4-channel spatial smoothing (untrained weights) |
 
-For the complete 11-section research audit, see **[research/validation-report.md](research/validation-report.md)**.
+*Per-event breakdowns and failure case audits are published in [research/real-data-validation-report.md](research/real-data-validation-report.md).*
+
+---
+
+### Track 2: Controlled Synthetic Sensor-Stress Benchmark
+*Authority: Controlled Physical Edge-Case & Confounder Isolation* — Detailed report: **[synthetic-stress.md](research/benchmarks/synthetic-stress.md)**
+
+*Notice: These scenarios are generated from controlled parametric physical equations to systematically isolate specific sensor failure modes. These metrics reflect stress response and must NOT be cited as real-world satellite generalization.*
+
+| Scenario ID | Tested Stressor / Confounder | Synthetic Stress IoU | Tested Invariant |
+| :--- | :--- | :---: | :--- |
+| **EVT_SYLHET_2026** | Dense monsoonal clouds ($25\%$ NaN in optical) | 0.7738 | Graceful degradation to radar-only evidence |
+| **EVT_RED_RIVER_2026** | Saturated agricultural soil (low land/water backscatter contrast) | 0.9890 | Dual-pol cross-channel separability |
+| **EVT_EBRO_2026** | Steep mountain topography ($> 8.5^\circ$ radar shadows) | 0.9958 | DEM slope constraint eliminates $100\%$ of shadow false alarms |
+| **EVT_MEKONG_2026** | Emergent wetland vegetation (depolarizing volume scattering) | 0.6365 | Cross-polarization VH suppression |
+| **EVT_BEIRA_2026** | Gale wind surface roughening on open water ($\sigma^0_{VV} > -15.5\text{ dB}$) | 0.1911 | Conflict detection surfaces `CONFLICTING_EVIDENCE` |
 
 ---
 

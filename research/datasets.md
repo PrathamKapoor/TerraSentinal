@@ -138,17 +138,31 @@ Each dataset is audited across 12 standardized dimensions:
 
 ---
 
-## 3. Curated Multi-Event Generalization Benchmark Suite (TerraSentinel)
+## 3. Dual-Track Benchmark Dataset Registry
 
-To prevent the catastrophic spatial and temporal leakage inherent in single-chip evaluations, TerraSentinel synthesizes and validates against 5 geographically distinct flood disaster events:
+To prevent confounding sensor-stress unit testing with empirical satellite accuracy, TerraSentinel maintains two distinct benchmark tracks:
 
-| Event ID | Event Name & Location | Biome & Geographic Typology | Primary Sensor Modalities | Environmental / Sensor Stressors | Benchmark Split | Ground Truth Source |
-| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
-| **EV-01** | `sylhet_bangladesh_2026` (Surma Basin) | Deltaic Monsoon Riverine Floodplain | Sentinel-1 SAR (VV/VH) + S2 Optical | Saturated paddy soils, dense rural settlements | **TRAIN** | Hand-validated Sen1Floods11 Sylhet + OSM |
-| **EV-02** | `red_river_usa_2026` (Fargo, North Dakota) | Spring Thaw Agricultural Lowlands | Sentinel-1 SAR (VV/VH) + Landsat-8/9 | Cold standing water, snowmelt mixture, clay soil | **TRAIN** | USGS Streamgage Inundation Maps |
-| **EV-03** | `ebro_valley_spain_2026` (Zaragoza, Spain) | Mediterranean Flash Flood in Complex Relief | Sentinel-1 SAR (VV/VH) + SRTM DEM | Deep radar terrain shadows, steep valley walls | **TRAIN** | Copernicus EMS Rapid Mapping (EMSR554) |
-| **EV-04** | `mekong_cambodia_2026` (Tonle Sap Basin) | Tropical Wetland & Floodplain Forests | Sentinel-1 SAR (VV/VH) + S2 Optical | Dense emergent canopy, double-bounce scattering | **VALIDATION**| Mekong River Commission Flood Bulletins |
-| **EV-05** | `beira_mozambique_2026` (Pungwe Estuary) | Coastal Cyclone Storm Surge (Cyclone Idai analog) | Sentinel-1 SAR (VV/VH) + S2 Optical | Gale wind-roughened open water ($\sigma^0 > -15\text{ dB}$) | **UNSEEN TEST**| UN-SPIDER / Copernicus EMSR348 Holdout |
+### 3.1 Track 1: Real-Data Empirical Multi-Event Benchmark (Sen1Floods11 v1.1)
+Authentic Earth-observation GeoTIFFs (Sentinel-1 SAR float32, Sentinel-2 MSI int16) with independent consensus hand-annotated ground truth. Out-of-domain event holdout:
+
+| Event ID | Event & Country | Biome / Typology | Sensor Modalities | Benchmark Split | Ground Truth Source | Manifest Assets |
+| :--- | :--- | :--- | :--- | :---: | :--- | :--- |
+| **EVT_BOLIVIA_MAMORE_2018** | Mamoré River, Bolivia | Lowland Amazonian River Surge | S1 SAR (VV/VH) + S2 MSI | **UNSEEN TEST** | Consensus hand-annotated labels (Cloud to Street) | `Bolivia_103757`, `Bolivia_129334`, `Bolivia_195474` |
+| **EVT_MEKONG_CAMBODIA_2018** | Tonle Sap, Cambodia | Tropical Wetland & Floodplain | S1 SAR (VV/VH) + S2 MSI | **VALIDATION** | Consensus hand-annotated labels (Cloud to Street) | `Mekong_1149855`, `Mekong_977338` |
+| **EVT_USA_MIDWEST_2019** | Arkansas River, USA | Agricultural Riverine Flatlands | S1 SAR (VV/VH) + S2 MSI | **TRAIN** | Consensus hand-annotated labels (Cloud to Street) | `USA_994009`, `USA_66026` |
+| **EVT_SPAIN_VEGA_BAJA_2019** | Segura River, Spain | Mediterranean Valley Relief | S1 SAR (VV/VH) + S2 MSI | **TRAIN** | Consensus hand-annotated labels (Cloud to Street) | `Spain_5923267`, `Spain_7786924` |
+| **EVT_INDIA_BRAHMAPUTRA_2016** | Brahmaputra, India | Monsoonal Alluvial Basin | S1 SAR (VV/VH) + S2 MSI | **TRAIN** | Consensus hand-annotated labels (Cloud to Street) | `India_285297`, `India_1072277` |
+
+### 3.2 Track 2: Controlled Synthetic Sensor-Stress Suite
+Parametric sensor stress models isolating specific physical failure modes. *Notice: Parametric fixtures; not claimed as real-world satellite generalization.*
+
+| Scenario ID | Scenario Name & Typology | Injected Physical Confounder | Stress Track | Role |
+| :--- | :--- | :--- | :---: | :--- |
+| **EVT_SYLHET_2026** | Sylhet Surma Basin (Alluvial) | Monsoonal cloud cover ($25\%$ NaN in MNDWI) | `SYNTHETIC_STRESS` | Graceful optical degradation test |
+| **EVT_RED_RIVER_2026**| Red River Lowlands (Clay soils) | Saturated soils reducing land/water contrast | `SYNTHETIC_STRESS` | Dual-pol separability stress |
+| **EVT_EBRO_2026** | Ebro Gorge (Steep mountain relief) | Mountain radar shadows ($> 8.5^\circ$) | `SYNTHETIC_STRESS` | DEM slope suppression verification |
+| **EVT_MEKONG_2026** | Mekong Delta (Tropical wetland) | Emergent canopy volume depolarization | `SYNTHETIC_STRESS` | Cross-pol weighting verification |
+| **EVT_BEIRA_2026** | Beira Coastal Surge (Cyclonic) | Gale wind water surface roughening | `SYNTHETIC_STRESS` | Conflict detection & override test |
 
 ---
 
@@ -156,11 +170,11 @@ To prevent the catastrophic spatial and temporal leakage inherent in single-chip
 
 | Dataset | Data Origin | License Compliance | Export Controlled? | Reusable for Commercial / Operational? | Subsystem Binding in TerraSentinel |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| **Sen1Floods11** | ESA / Cloud to Street | CC BY-4.0 | No | Yes | `benchmark_runner.py`, `DualPolSARTerrainAdapter` |
+| **Sen1Floods11** | ESA / NASA / Cloud to Street | CC BY-4.0 | No | Yes | `Sen1Floods11Adapter`, `benchmark_runner.py` (Real Track) |
 | **xBD** | Maxar / CMU | CC BY-NC 4.0 | No | Research Only (Commercial uses OSM adaptation) | `schemas.py` (`DamageState` taxonomy) |
-| **BRIGHT** | U-Tokyo / RIKEN | CC BY-NC-SA 4.0 | No | Research Only | Structural damage validation reference |
+| **BRIGHT** | U-Tokyo / RIKEN | CC BY-NC-SA 4.0 | No | Research Only | `BRIGHTAdapter` (Structural damage reference) |
 | **FloodNet** | UMBC / BinaLab | CC BY-NC-SA 4.0 | No | Research Only | Road passability threshold calibration |
 | **OpenStreetMap**| OSM Community | ODbL 1.0 | No | Yes (with attribution) | `infrastructure.py`, `network_engine.py` |
 | **WorldPop** | U-Southampton | CC BY-4.0 | No | Yes | `isolation_engine.py`, `priority_engine.py` |
 | **NASADEM** | NASA / USGS | Public Domain | No | Yes | `preprocessing.py` (30m slope derivation) |
-| **Curated Suite**| TerraSentinel | Apache 2.0 / MIT | No | Yes | `benchmark_runner.py`, `validation-report.md` |
+| **Synthetic Suite**| TerraSentinel | MIT | No | Yes | `SyntheticStressAdapter` (Sensor stress testing) |

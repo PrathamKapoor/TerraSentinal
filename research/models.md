@@ -160,13 +160,14 @@ Each model is evaluated across 11 standardized dimensions:
 
 | Model / Subsystem Identifier | Architecture Type | Input Resolution | Parameter Count | Inference Latency (ms) | Peak RAM / VRAM | Verification Test | Operational Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
-| **DualPolSARTerrainAdapter** | Physical-Statistical / Sobel | 10m–30m | 0 (Heuristic) | **1.2 ms** | < 50 MB | `test_flood_detector.py` | **LIVE / VERIFIED** |
-| **UNetFloodAdapter** | 4-Stage Conv Encoder-Decoder | 10m | 1.8M | **2.1 ms** | < 120 MB | `test_flood_detector.py` | **LIVE / VERIFIED** |
-| **EvidenceFusionEngine** | Bounded Dempster-Shafer | 10m–30m | 0 (Algorithmic) | **3.9 ms** | < 60 MB | `test_evidence_fusion.py` | **LIVE / VERIFIED** |
+| **DualPolSARTerrainAdapter** | Physical-Statistical / Sobel | 10m–30m | 0 (Heuristic) | **1.2 ms** | < 50 MB | `test_flood_detector.py` | **LIVE / VERIFIED (HEURISTIC)** |
+| **UNetFloodAdapter** | Heuristic Conv Spatial Adapter| 10m | 1.8M | **2.1 ms** | < 120 MB | `test_flood_detector.py` | **UNTRAINED / ADAPTER** |
+| **EvidenceFusionEngine** | Bounded Dempster-Shafer | 10m–30m | 0 (Algorithmic) | **3.9 ms** | < 60 MB | `test_evidence_fusion.py` | **LIVE / VERIFIED (HEURISTIC)** |
 | **InfrastructureService** | Vector Spatial Index (STRtree)| Vector | N/A | **8.5 ms** | < 45 MB | `test_geospatial_crs.py` | **LIVE / VERIFIED** |
 | **DynamicNetworkEngine** | NetworkX Multigraph | Vector | N/A | **14.2 ms** | < 80 MB | `test_network_validation.py` | **LIVE / VERIFIED** |
 | **PriorityEngine** | Logarithmic Multi-Criteria | Structured | N/A | **0.8 ms** | < 15 MB | `test_priority_sensitivity.py`| **LIVE / VERIFIED** |
 | **SimulationEngine** | Immutable Graph Perturbation | Vector | N/A | **18.5 ms** | < 90 MB | `test_simulation_validation.py`| **LIVE / VERIFIED** |
 | **ReceiptService** | Canonical SHA-256 Ledger | JSON | N/A | **0.4 ms** | < 10 MB | `test_decision_receipt_tamper.py`| **LIVE / VERIFIED** |
-| **Prithvi-EO-2.0** | Vision Transformer (ViT-MAE) | 30m | 300M / 600M | ~450 ms | > 16 GB | External Adapter Hook | **CLOUD ADAPTER** |
-| **ChangeMamba** | State Space Model (SSM) | 10m | 42M | ~120 ms | > 8 GB | `change_detector.py` | **THEORETICAL REFERENCE** |
+| **Prithvi-EO-2.0** | Vision Transformer (ViT-MAE) | 30m | 300M / 600M | N/A | > 16 GB | `test_real_data_adapter.py` | **BLOCKED (Weights Not Present)** |
+| **ChangeMamba** | State Space Model (SSM) | 10m | 42M | N/A | > 8 GB | `test_real_data_adapter.py` | **BLOCKED (CUDA mamba_ssm Absent)** |
+| **TerraMind** | Multimodal Foundation Model | 10m–30m | 200M | N/A | > 12 GB | `test_real_data_adapter.py` | **BLOCKED (Weights Not Present)** |

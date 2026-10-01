@@ -75,47 +75,50 @@ Our audit inspected the benchmark dataset synthesis pipeline (`backend/app/servi
 
 ---
 
-## 3. Multi-Event Cross-Geographic Holdout Benchmark
+## 3. Controlled Synthetic Multi-Event Sensor-Stress Benchmark
 
-To eliminate random chip leakage and establish true generalization boundaries, we implemented an event-level holdout protocol across 5 geographically, topographically, and climatically distinct disaster events:
+> **Methodological Reclassification Notice:**  
+> The 5 disaster scenarios below are generated from controlled parametric physical equations (`SyntheticStressAdapter` / `MultiEventGenerator`) to systematically test sensor degradation modes in isolation.  
+> These numbers represent **controlled sensor-stress test response** and must **NOT** be cited as real-world satellite generalization.  
+> All authentic Earth-observation validation is documented in Section 3.3 and the dedicated **[Real-Data Validation Report](real-data-validation-report.md)**.
 
-### 3.1 Event Split Specifications
-1. **Event A: `sylhet_bangladesh_2026` [TRAIN]**
+### 3.1 Controlled Stress Scenario Specifications
+1. **Scenario A: `sylhet_bangladesh_2026` [TRAIN]**
    - *Biome:* Deltaic monsoon riverine floodplain.
-   - *Physical Challenges:* Saturated soils, agricultural paddy inundation, low elevation gradient.
-2. **Event B: `red_river_usa_2026` [TRAIN]**
+   - *Injected Physical Stressor:* Saturated soils, monsoonal cloud cover ($25\%$ NaN in MNDWI), northern mountain radar shadows.
+2. **Scenario B: `red_river_usa_2026` [TRAIN]**
    - *Biome:* Spring thaw agricultural lowlands (Fargo, North Dakota).
-   - *Physical Challenges:* Snowmelt mixture, flat clay soils, cold standing water.
-3. **Event C: `ebro_valley_spain_2026` [TRAIN]**
+   - *Injected Physical Stressor:* Saturated clay soils with low specular contrast ($-14.2\text{ dB}$).
+3. **Scenario C: `ebro_valley_spain_2026` [TRAIN]**
    - *Biome:* Mediterranean flash flood with complex mountainous topography.
-   - *Physical Challenges:* Steep terrain, deep radar shadows, localized gorge overflows.
-4. **Event D: `mekong_cambodia_2026` [VALIDATION]**
+   - *Injected Physical Stressor:* Steep valley walls ($> 8.5^\circ$) with backscatter at $-19.2\text{ dB}$ mimicking radar water returns.
+4. **Scenario D: `mekong_cambodia_2026` [VALIDATION]**
    - *Biome:* Tropical wetland & Tonle Sap basin.
-   - *Physical Challenges:* Dense emergent vegetation canopy, flooded mangrove forests.
-5. **Event E: `beira_mozambique_2026` [UNSEEN TEST]**
+   - *Injected Physical Stressor:* Dense emergent flooded canopy causing depolarizing volume scattering (elevated VH return at $-21.8\text{ dB}$).
+5. **Scenario E: `beira_mozambique_2026` [TEST]**
    - *Biome:* Coastal cyclone storm surge (Cyclone Idai analog).
-   - *Physical Challenges:* Gale-force wind-roughened open floodwaters ($\sigma^0_{VV} > -15.5\text{ dB}$), urban rubble, variable cloud cover.
+   - *Injected Physical Stressor:* Gale-force wind surface roughening raising open water backscatter to $-15.5\text{ dB}$ (violating the $-16\text{ dB}$ specular cutoff).
 
 ---
 
-## 4. Controlled Multimodal Ablation Experiments
+## 4. Controlled Synthetic Multimodal Stress Experiments
 
-We executed controlled ablation experiments (EXP-A through EXP-E) across the multi-event suite to evaluate the exact contribution of each sensor modality under both benign and severe environmental stressors.
+Controlled ablation experiments (EXP-A through EXP-E) were executed across the synthetic stress suite to isolate how each modality responds to specific physical confounders.
 
-### 4.1 Ablation Matrix & Empirical Results
+### 4.1 Synthetic Stress Ablation Matrix & Results
 
-| Exp ID | Configuration | Modalities Active | Fusion / Adaptation Method | Train Set IoU (Sylhet, Red River, Ebro) | Val Set IoU (Mekong Basin) | Unseen Test IoU (Beira Surge) | Overall Macro IoU | Overall F1 / Dice | Mean Latency (ms) | Primary Failure Modes |
+| Exp ID | Configuration | Modalities Active | Fusion / Adaptation Method | Train Set IoU (Sylhet, Red River, Ebro) | Val Set IoU (Mekong Basin) | Stress Test IoU (Beira Surge) | Overall Macro IoU | Overall F1 / Dice | Mean Latency (ms) | Primary Failure Modes Tested |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **EXP-A** | SAR Single-Pol | SAR VV only | Calibrated dB thresholding ($\le -16\text{ dB}$) | 0.9998 | 0.6842 | 0.2215 | **0.6352** | 0.7769 | **1.2 ms** | Fails on wind-roughened water; radar shadows in Ebro Valley. |
+| **EXP-A** | SAR Single-Pol | SAR VV only | Calibrated dB thresholding ($\le -16\text{ dB}$) | 0.9998 | 0.6842 | 0.2215 | **0.6352** | 0.7769 | **1.2 ms** | Collapses on wind-roughened water; radar shadows in Ebro Valley. |
 | **EXP-B** | Optical Only | Sentinel-2 MNDWI | Spectral ratio thresholding ($\text{MNDWI} > 0.0$) | 0.7748 | 0.7610 | 0.8240 | **0.7866** | 0.8805 | **1.5 ms** | Completely blind under cloud cover; turbid water edge attenuation. |
 | **EXP-C** | SAR Dual-Pol | SAR VV + VH | Dual-channel conjunction ($\text{VV} < -16 \land \text{VH} < -23$) | 0.9961 | 0.7125 | 0.2450 | **0.6512** | 0.7888 | **2.1 ms** | Cross-polarization suppresses volume noise but remains vulnerable to gale wind. |
 | **EXP-D** | SAR Dual + DEM | SAR VV + VH + SRTM DEM | Topographic masking ($\text{Slope} \le 8.0^\circ$) | 0.9961 | 0.7240 | 0.2450 | **0.6550** | 0.7915 | **2.8 ms** | Eliminates 100% of mountain ridge false alarms; fails on wind roughening. |
 | **EXP-E** | Full Evidence Fusion | SAR Dual + Optical + DEM | Dynamic evidential fusion & conflict reasoning | 0.7692 | 0.8120 | 0.8515 | **0.8109** | **0.8956** | **3.9 ms** | Discards discordant wind-roughened radar pixels; surfaces conflict mask. |
 
-### 4.2 Key Scientific Insights
-1. **The Wind-Roughening Cliff:** On the unseen test event (`beira_mozambique_2026`), gale-force winds roughened open water surfaces, destroying the specular reflection of C-band microwaves. SAR-only models collapsed from $> 0.99$ to $0.2215$ IoU.
-2. **Multimodal Resilience:** In EXP-E (Full Fusion), the presence of unclouded optical MNDWI evidence overrode the ambiguous SAR signal, preserving an IoU of $0.8515$ on Beira.
-3. **Terrain Disambiguation:** In the Ebro Valley event, DEM slope pruning eliminated false water detections on 24 hill-slope radar shadow zones without pruning valley-floor floodplains.
+### 4.2 Key Engineering Insights from Stress Testing
+1. **The Wind-Roughening Cliff:** On scenario E (`beira_mozambique_2026`), gale-force winds roughened open water surfaces, destroying specular reflection. SAR-only models collapsed to $0.2215$ IoU.
+2. **Multimodal Conflict Surfacing:** In EXP-E, optical evidence was discordant with wind-roughened radar evidence, successfully triggering `CONFLICTING_EVIDENCE` warnings for human operator verification.
+3. **Terrain Disambiguation:** In the Ebro Valley scenario, DEM slope pruning successfully suppressed radar shadow false alarms on slopes $> 8.5^\circ$.
 
 ---
 

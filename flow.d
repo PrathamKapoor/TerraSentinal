@@ -363,3 +363,79 @@ This document specifies the observable execution flow, algorithmic logic, data d
 - Calculated human impact (isolated population, cut-off hospitals).
 - Human verification logs and operator signatures.
 - Cryptographic SHA-256 verification hash certifying un-tampered record.
+
+---
+
+## 3. Evaluation & Validation Dual-Track Execution Flow
+
+To ensure absolute methodological separation between sensor-stress unit testing and authentic Earth-observation validation, TerraSentinel executes two independent evaluation flows:
+
+### 3.1 Real Data Validation Path (Empirical Authority)
+
+```
+[Public Dataset Repository: Google Cloud Storage / Sen1Floods11 v1.1]
+                         │
+                         │ HTTP / GCS acquisition of authentic S1, S2, Label GeoTIFFs
+                         ▼
+             [Data Acquisition & Verification]
+                         │
+                         │ Validates file integrity, calculates SHA-256 digests
+                         │ Compiles sen1floods11_manifest.json with provenance
+                         ▼
+               [RealDatasetAdapter]
+                         │
+                         │ Sen1Floods11Adapter transforms GeoTIFFs to SceneBundle
+                         │ Preserves WGS84 bounds, sets is_fixture=False
+                         │ Generates boolean valid_mask (excluding label == -1)
+                         ▼
+        [Automated Anti-Circularity & Integrity Gate]
+                         │
+                         │ validate_benchmark_integrity()
+                         │ Rejects synthetic fixtures, detects circular threshold derivations
+                         │ FAILS BENCHMARK VALIDATION if ground truth is mathematically derived
+                         ▼
+                [Real Baseline Suite]
+                         │
+                         ├── BASE-A: SAR Dual-Pol Thresholding (HEURISTIC)
+                         ├── BASE-B: Optical MNDWI Thresholding (HEURISTIC)
+                         ├── BASE-C: Multimodal Consensus (HEURISTIC)
+                         ├── BASE-D: TerraSentinel Evidential Fusion (HEURISTIC)
+                         └── BASE-E: Convolutional U-Net Adapter (UNTRAINED / ADAPTER)
+                         ▼
+          [Hierarchical Real-Data Metrics Engine]
+                         │
+                         │ Computes IoU, Dice/F1, Precision, Recall on valid pixels
+                         │ Generates per-scene, per-event, and per-split metrics
+                         │ Computes unweighted Macro IoU and global Micro IoU
+                         ▼
+        [Published Real-Data Validation Report]
+        (research/real-data-validation-report.md)
+```
+
+---
+
+### 3.2 Controlled Synthetic Sensor-Stress Path (Engineering Stress Authority)
+
+```
+[Controlled Scenario Generator (MultiEventGenerator)]
+                         │
+                         │ Generates parametric stress matrices with physical confounders:
+                         │ - EVT_SYLHET_2026: Monsoonal cloud cover
+                         │ - EVT_RED_RIVER_2026: Saturated soil / low backscatter contrast
+                         │ - EVT_EBRO_2026: Steep mountain radar shadows (> 8.5 deg)
+                         │ - EVT_MEKONG_2026: Flooded vegetation volume scattering
+                         │ - EVT_BEIRA_2026: Gale-force wind surface roughening
+                         ▼
+             [SyntheticStressAdapter]
+                         │
+                         │ Sets is_real_data=False, SceneBundle.is_fixture=True
+                         │ Track: CONTROLLED_SYNTHETIC_SENSOR_STRESS
+                         ▼
+              [Sensor Stress Evaluation]
+                         │
+                         │ Evaluates single-channel collapse & conflict surfacing
+                         │ Verifies slope shadow suppression invariant
+                         ▼
+         [Synthetic Stress Metrics & Failure Logs]
+        (research/benchmarks/synthetic-stress.md)
+```

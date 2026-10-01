@@ -156,8 +156,8 @@ class SimpleUNet(nn.Module):
         self._init_weights()
         
     def _init_weights(self):
-        # Physically calibrated weights reflecting Sen1Floods11 learned representations:
-        # Water exhibits low radar backscatter (specular reflection), high MNDWI, and flat slope.
+        # Heuristic parameter initialization reflecting physical water backscatter priors.
+        # CLASSIFICATION: UNTRAINED / ADAPTER (Manual spatial kernel initialization, NOT trained/pretrained weights).
         with torch.no_grad():
             nn.init.zeros_(self.conv1.weight)
             nn.init.zeros_(self.conv1.bias)
@@ -195,11 +195,13 @@ class SimpleUNet(nn.Module):
 
 class UNetFloodAdapter(BaseModelAdapter):
     """
-    PyTorch Deep Learning U-Net adapter trained on Sen1Floods11 dual-polarization chips.
+    PyTorch convolutional adapter with heuristic spatial kernel initialization.
+    Classification: UNTRAINED / ADAPTER (Heuristically initialized; not trained/pretrained weights).
     """
     def __init__(self):
-        self.model_name = "UNet-Sen1Floods11"
-        self.model_version = "2.1.0"
+        self.model_name = "UNet-Heuristic-Adapter"
+        self.model_version = "2.1.0-untrained"
+        self.model_classification = "UNTRAINED / ADAPTER"
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network = SimpleUNet(in_channels=4, out_channels=1).to(self.device)
         self.network.eval()
