@@ -74,7 +74,9 @@ The research benchmarking suite executes the following formal matrix:
 
 ## 4. Reproducible Benchmark Runner Protocol
 
-All benchmark experiments in TerraSentinel are driven by `backend/app/research/benchmark_runner.py`.
-- No benchmark metrics are fabricated.
-- Runs evaluate on deterministic test splits (e.g. Sen1Floods11 test chips and fixture scenarios).
+All benchmark experiments in TerraSentinel are driven by `backend/app/research/benchmark_runner.py` under two strictly separated tracks:
+1. **REAL-DATA VALIDATION TRACK:** Evaluates authentic Copernicus Sentinel-1 SAR and Sentinel-2 optical GeoTIFFs from Sen1Floods11 v1.1 against consensus hand labels with strict out-of-domain event holdout (Bolivia Mamoré test). See **[`real-data-validation.md`](benchmarks/real-data-validation.md)** and **[`real-data-validation-report.md`](real-data-validation-report.md)**.
+2. **CONTROLLED SYNTHETIC SENSOR-STRESS TRACK:** Isolates physical sensor degradation modes (gale winds, severe radar shadows, volume scattering) in controlled parametric scenarios. See **[`synthetic-stress.md`](benchmarks/synthetic-stress.md)**.
+- Anti-circularity assertion (`validate_benchmark_integrity`) fails validation if ground truth is mathematically derived from evaluated thresholds.
 - Outputs are saved with JSON experiment logs, confusion matrices, and calibration curves.
+

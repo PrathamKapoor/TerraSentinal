@@ -1,0 +1,535 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "benchmark_track": "REAL_DATA_VALIDATION",
+  "dataset_name": "Sen1Floods11",
+  "dataset_version": "v1.1",
+  "total_samples": 11,
+  "generated_at": "2026-10-01T05:46:13.759723",
+  "splits": {
+    "TEST": [
+      "Bolivia_103757",
+      "Bolivia_129334",
+      "Bolivia_195474"
+    ],
+    "VAL": [
+      "Mekong_1149855",
+      "Mekong_977338"
+    ],
+    "TRAIN": [
+      "USA_994009",
+      "USA_66026",
+      "Spain_5923267",
+      "Spain_7786924",
+      "India_285297",
+      "India_1072277"
+    ]
+  },
+  "samples": [
+    {
+      "sample_id": "Bolivia_103757",
+      "split": "TEST",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_BOLIVIA_MAMORE_2018",
+      "event_name": "Mamor\u00e9 River Flood (Bolivia)",
+      "country": "Bolivia",
+      "iso_cc": "BOL",
+      "region": "Beni Department, Amazon Basin",
+      "hazard_type": "LOWLAND_RIVERINE_SURGE",
+      "s1_acquisition_time": "2018-02-15T00:00:00Z",
+      "s2_acquisition_time": "2018-02-15T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Bolivia_103757_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Bolivia_103757_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Bolivia_103757_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_103757_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_103757_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_103757_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "d7c7630e6540b3d32b063ed079d73e55c95b1c0347f5d94257b2b7300befb4c8",
+        "s2": "d16f68d9fffa6235b44cc31b186ec4ab5179420892fc59589d597717afeb19ad",
+        "label": "3a48e1af6d70db96895a3a196dc86e6264c97772d85308039b0a2095e3154b6e"
+      },
+      "file_sizes_bytes": {
+        "s1": 698748,
+        "s2": 908533,
+        "label": 7609
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Bolivia_129334",
+      "split": "TEST",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_BOLIVIA_MAMORE_2018",
+      "event_name": "Mamor\u00e9 River Flood (Bolivia)",
+      "country": "Bolivia",
+      "iso_cc": "BOL",
+      "region": "Beni Department, Amazon Basin",
+      "hazard_type": "LOWLAND_RIVERINE_SURGE",
+      "s1_acquisition_time": "2018-02-15T00:00:00Z",
+      "s2_acquisition_time": "2018-02-15T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Bolivia_129334_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Bolivia_129334_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Bolivia_129334_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_129334_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_129334_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_129334_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "9d09909c8067a8e0bbe1e2d6199a4656d3cf059c6c599f060d8f08ece3392646",
+        "s2": "49eb5631caafcec4759494d0fc7a5e9a7d48329d878c0b4d81d5e97dfbdb783c",
+        "label": "8dc1ea3c75551a72dfe64ebf03286fdaa1c1c83e200f13a75c8c6b5c75a6bedf"
+      },
+      "file_sizes_bytes": {
+        "s1": 1764952,
+        "s2": 2191905,
+        "label": 13085
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Bolivia_195474",
+      "split": "TEST",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_BOLIVIA_MAMORE_2018",
+      "event_name": "Mamor\u00e9 River Flood (Bolivia)",
+      "country": "Bolivia",
+      "iso_cc": "BOL",
+      "region": "Beni Department, Amazon Basin",
+      "hazard_type": "LOWLAND_RIVERINE_SURGE",
+      "s1_acquisition_time": "2018-02-15T00:00:00Z",
+      "s2_acquisition_time": "2018-02-15T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Bolivia_195474_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Bolivia_195474_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Bolivia_195474_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_195474_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_195474_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Bolivia_195474_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "a12ec27a55d6779bc278c0a57928741980723b0e1f94e5cd17d2c4f013ebd3ff",
+        "s2": "4c6ed5a8d81f959c29b09704c44dfbccb4bf5069a4238abfa78538bb0888e425",
+        "label": "abde104335e832d1e928c89d8af7fa730397abbb21f6edbb186be60f375b2c3c"
+      },
+      "file_sizes_bytes": {
+        "s1": 1769545,
+        "s2": 3103128,
+        "label": 1923
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Mekong_1149855",
+      "split": "VAL",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_MEKONG_CAMBODIA_2018",
+      "event_name": "Mekong River Monsoon Expansion",
+      "country": "Cambodia",
+      "iso_cc": "KHM",
+      "region": "Tonle Sap Basin / Mekong Delta",
+      "hazard_type": "TROPICAL_WETLAND_FLOOD",
+      "s1_acquisition_time": "2018-08-05T00:00:00Z",
+      "s2_acquisition_time": "2018-08-04T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Mekong_1149855_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Mekong_1149855_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Mekong_1149855_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_1149855_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_1149855_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_1149855_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "e53925ce5265c89099b9d3aa1915661173ffd34375c751e2e24c1b1a4bd07587",
+        "s2": "2602b6296dbba88515b4fe0695c54279760243c9cbc81125ccb4168c9b65ff5f",
+        "label": "e90aaedbb51c617c6250c06cbeff13a14c992c46e5df1fe5b8988a5b239308b6"
+      },
+      "file_sizes_bytes": {
+        "s1": 1780298,
+        "s2": 2522413,
+        "label": 8988
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Mekong_977338",
+      "split": "VAL",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_MEKONG_CAMBODIA_2018",
+      "event_name": "Mekong River Monsoon Expansion",
+      "country": "Cambodia",
+      "iso_cc": "KHM",
+      "region": "Tonle Sap Basin / Mekong Delta",
+      "hazard_type": "TROPICAL_WETLAND_FLOOD",
+      "s1_acquisition_time": "2018-08-05T00:00:00Z",
+      "s2_acquisition_time": "2018-08-04T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Mekong_977338_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Mekong_977338_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Mekong_977338_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_977338_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_977338_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Mekong_977338_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "5ffb563b56a5d29ddd01595be0607d37bacde1c9b7add18f73eeefd8d5b036c8",
+        "s2": "7ba08e2486e2e0a70f7c01b27b1b3cddeed14f44660e115f1a3cec46c874a119",
+        "label": "8c31782f749d7c02634ab77b299ecb4aedc72782dd321184906fecdca98d0819"
+      },
+      "file_sizes_bytes": {
+        "s1": 1793352,
+        "s2": 2554449,
+        "label": 8100
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "USA_994009",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_USA_MIDWEST_2019",
+      "event_name": "Arkansas / Mississippi River Basin Floods",
+      "country": "USA",
+      "iso_cc": "USA",
+      "region": "Arkansas River Floodplain, USA",
+      "hazard_type": "AGRICULTURAL_LOWLAND_FLOOD",
+      "s1_acquisition_time": "2019-05-22T00:00:00Z",
+      "s2_acquisition_time": "2019-05-22T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/USA_994009_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/USA_994009_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/USA_994009_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_994009_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_994009_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_994009_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "cab5273c6d8c0f88374a0c4812a232679a70d0b1e0801d50734259848ba0eccc",
+        "s2": "c8a2c5444ad204b807c60c15197377a9370b04368cb5d8520e3016ee87fad7df",
+        "label": "93a8cf2f6ac0be1bc6e057e171f22bf11d5c58bc8c5650012014d80c3aec72d3"
+      },
+      "file_sizes_bytes": {
+        "s1": 1462886,
+        "s2": 2151874,
+        "label": 2207
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "USA_66026",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_USA_MIDWEST_2019",
+      "event_name": "Arkansas / Mississippi River Basin Floods",
+      "country": "USA",
+      "iso_cc": "USA",
+      "region": "Arkansas River Floodplain, USA",
+      "hazard_type": "AGRICULTURAL_LOWLAND_FLOOD",
+      "s1_acquisition_time": "2019-05-22T00:00:00Z",
+      "s2_acquisition_time": "2019-05-22T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/USA_66026_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/USA_66026_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/USA_66026_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_66026_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_66026_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\USA_66026_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "eebadc318d87bc01d74cff9b88167c8245d8311250556d9b4045c82015ac81f0",
+        "s2": "080ea3b0c6e836438b388a756aa36018e3a9fb72621743857e055c158e01af47",
+        "label": "a07d53969526a3501bc57086dcbc81311d2cc9cd11039e4ca493515f2648d15d"
+      },
+      "file_sizes_bytes": {
+        "s1": 1452886,
+        "s2": 2159492,
+        "label": 1436
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Spain_5923267",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_SPAIN_VEGA_BAJA_2019",
+      "event_name": "Vega Baja Segura River Flash Flood",
+      "country": "Spain",
+      "iso_cc": "ESP",
+      "region": "Alicante / Murcia, Spain",
+      "hazard_type": "MEDITERRANEAN_VALLEY_FLASH_FLOOD",
+      "s1_acquisition_time": "2019-09-17T00:00:00Z",
+      "s2_acquisition_time": "2019-09-18T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Spain_5923267_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Spain_5923267_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Spain_5923267_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_5923267_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_5923267_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_5923267_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "99c9ebecbff3b3e83f4bf093bbc86b7e5c9a8af3d7309f4710b7c44591306d42",
+        "s2": "93348a27557255cfcb4165e29e3c01de1ec74d3b6bb6636e6236d7b07c2623cd",
+        "label": "0aecbc8c0cf4a8172ad090df1ae05c0df428926985afe9cd7764071d9a0273c9"
+      },
+      "file_sizes_bytes": {
+        "s1": 1499785,
+        "s2": 1831813,
+        "label": 5916
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "Spain_7786924",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_SPAIN_VEGA_BAJA_2019",
+      "event_name": "Vega Baja Segura River Flash Flood",
+      "country": "Spain",
+      "iso_cc": "ESP",
+      "region": "Alicante / Murcia, Spain",
+      "hazard_type": "MEDITERRANEAN_VALLEY_FLASH_FLOOD",
+      "s1_acquisition_time": "2019-09-17T00:00:00Z",
+      "s2_acquisition_time": "2019-09-18T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/Spain_7786924_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/Spain_7786924_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/Spain_7786924_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_7786924_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_7786924_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\Spain_7786924_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "b6a54849be1706c18947d232dff82dca0c62b0c42e78fa7630576c7c19a26cc1",
+        "s2": "2c5f50265d78c05f1ebc959bfa0b7a31ff4eb60973871cb4a7f19b3f177c3708",
+        "label": "c18b9bb4fe2d5f254b3365599545fe5bfb820046ca0d8e64853db0aa17135db2"
+      },
+      "file_sizes_bytes": {
+        "s1": 1497343,
+        "s2": 2358640,
+        "label": 2878
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "India_285297",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_INDIA_BRAHMAPUTRA_2016",
+      "event_name": "Brahmaputra Monsoon Basin Flood",
+      "country": "India",
+      "iso_cc": "IND",
+      "region": "Assam / Bihar, India",
+      "hazard_type": "MONSOONAL_ALLUVIAL_FLOOD",
+      "s1_acquisition_time": "2016-08-12T00:00:00Z",
+      "s2_acquisition_time": "2016-08-12T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/India_285297_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/India_285297_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/India_285297_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_285297_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_285297_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_285297_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "d720e440668b59affe70047b8e3694d04917abe10309c0a342ecdb000f14319f",
+        "s2": "4ad194107cde9ad40e22a996f68e8d48eebe1cadfd299b63cb86d3da931495bd",
+        "label": "ebe00d64a4615a44b55a14f6e2714a35258378d1b424cb3ba5f08a35132013f2"
+      },
+      "file_sizes_bytes": {
+        "s1": 1669481,
+        "s2": 2398643,
+        "label": 15127
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    },
+    {
+      "sample_id": "India_1072277",
+      "split": "TRAIN",
+      "dataset": "Sen1Floods11",
+      "dataset_version": "v1.1",
+      "event_id": "EVT_INDIA_BRAHMAPUTRA_2016",
+      "event_name": "Brahmaputra Monsoon Basin Flood",
+      "country": "India",
+      "iso_cc": "IND",
+      "region": "Assam / Bihar, India",
+      "hazard_type": "MONSOONAL_ALLUVIAL_FLOOD",
+      "s1_acquisition_time": "2016-08-12T00:00:00Z",
+      "s2_acquisition_time": "2016-08-12T00:00:00Z",
+      "source_urls": {
+        "s1": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S1Hand/India_1072277_S1Hand.tif",
+        "s2": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/S2Hand/India_1072277_S2Hand.tif",
+        "label": "https://storage.googleapis.com/sen1floods11/v1.1/data/flood_events/HandLabeled/LabelHand/India_1072277_LabelHand.tif"
+      },
+      "local_paths": {
+        "s1": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_1072277_S1Hand.tif",
+        "s2": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_1072277_S2Hand.tif",
+        "label": "..\\..\\..\\storage\\real_benchmark\\sen1floods11\\India_1072277_LabelHand.tif"
+      },
+      "sha256_checksums": {
+        "s1": "a77bd81e7735a427634f2a745937943d2bc6c9d3be272a14ce7e7dd5cc97dd23",
+        "s2": "37b482968ce5c38b132212d493a35fbaad4d79cfd1c4fd9fe35f69055e0509e8",
+        "label": "3c666009079d0fc3d5a4db049358b36516a069b425528d8288a85b07a8b0a206"
+      },
+      "file_sizes_bytes": {
+        "s1": 1668141,
+        "s2": 2301250,
+        "label": 10719
+      },
+      "modality": [
+        "Sentinel-1 SAR C-band GRD IW (VV/VH dual-pol, float32, 10m GSD)",
+        "Sentinel-2 MSI Surface Reflectance (13 spectral bands, int16, 10m GSD)"
+      ],
+      "ground_truth_source": "Consensus hand-annotated raster (Cloud to Street / NASA / ESA)",
+      "label_semantics": {
+        "-1": "Invalid / Cloud / No-Data (Masked)",
+        "0": "Non-water / Dry Land",
+        "1": "Water (Floodwater or Surface Water)"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY-4.0)",
+      "preprocessing_version": "v1.0 (Direct calibrated dB SAR; Normalized green/SWIR MNDWI)"
+    }
+  ]
+}
